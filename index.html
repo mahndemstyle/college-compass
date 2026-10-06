@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>College Compass</title>
+<meta name="description" content="College Compass helps students explore colleges, careers, and ways to pay for school.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #13233a;
+    --ink-soft: #4a5a70;
+    --bg: #fbfaf7;
+    --surface: #ffffff;
+    --line: #e4e1d8;
+    --brand: #0f766e;
+    --brand-dark: #0b5952;
+    --brand-tint: #e3f3f1;
+    --accent: #f26b4f;
+    --accent-tint: #fde9e4;
+    --sun: #f6b93b;
+    --radius: 14px;
+    --shadow: 0 1px 2px rgba(19,35,58,.06), 0 8px 24px rgba(19,35,58,.06);
+    --max: 1160px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: Inter, system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.6;
+  }
+  h1, h2, h3 { font-family: Fraunces, Georgia, serif; line-height: 1.15; margin: 0 0 .5em; }
+  a { color: inherit; }
+  img, svg { display: block; }
+  .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 22px; border-radius: 999px; border: 0;
+    font: 600 15px Inter, sans-serif; text-decoration: none; cursor: pointer;
+    transition: transform .15s, background .15s;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-primary { background: var(--brand); color: #fff; }
+  .btn-primary:hover { background: var(--brand-dark); }
+  .btn-ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+  .btn-accent { background: var(--accent); color: #fff; }
+  .eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--brand); }
+
+  /* Header */
+  header {
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(251,250,247,.92); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 68px; }
+  .logo { display: flex; align-items: center; gap: 10px; font: 700 20px Fraunces, serif; text-decoration: none; }
+  .nav-links { display: flex; gap: 28px; list-style: none; margin: 0; padding: 0; }
+  .nav-links a { text-decoration: none; font-weight: 500; color: var(--ink-soft); }
+  .nav-links a:hover { color: var(--brand); }
+  .nav-cta { display: flex; gap: 10px; }
+  .menu-btn { display: none; background: none; border: 0; padding: 8px; cursor: pointer; }
+
+  /* Hero */
+  .hero { padding: 72px 0 56px; overflow: hidden; }
+  .hero-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; }
+  .hero h1 { font-size: clamp(38px, 5.5vw, 62px); }
+  .hero h1 em { font-style: normal; color: var(--brand); }
+  .hero p.lead { font-size: 19px; color: var(--ink-soft); max-width: 520px; }
+  .search {
+    display: flex; gap: 8px; margin: 28px 0 18px; max-width: 520px;
+    background: var(--surface); padding: 6px; border-radius: 999px;
+    box-shadow: var(--shadow); border: 1px solid var(--line);
+  }
+  .search input {
+    flex: 1; min-width: 0; border: 0; outline: 0; padding: 0 16px;
+    font: 16px Inter, sans-serif; background: transparent; color: var(--ink);
+  }
+  .hero-tags { display: flex; flex-wrap: wrap; gap: 8px; font-size: 14px; color: var(--ink-soft); }
+  .hero-tags button {
+    border: 1px solid var(--line); background: var(--surface); border-radius: 999px;
+    padding: 4px 12px; font: 500 13px Inter, sans-serif; color: var(--ink-soft); cursor: pointer;
+  }
+  .hero-tags button:hover { border-color: var(--brand); color: var(--brand); }
+  .hero-art { position: relative; aspect-ratio: 1; max-width: 460px; justify-self: center; width: 100%; }
+  .hero-card {
+    position: absolute; background: var(--surface); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 16px 18px; font-size: 14px; border: 1px solid var(--line);
+  }
+  .hero-card strong { display: block; font-size: 22px; font-family: Fraunces, serif; }
+
+  /* Pathways */
+  section { padding: 72px 0; }
+  .section-head { max-width: 640px; margin-bottom: 36px; }
+  .section-head h2 { font-size: clamp(28px, 3.5vw, 40px); }
+  .section-head p { color: var(--ink-soft); font-size: 17px; margin: 0; }
+  .paths { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .path {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 26px; text-decoration: none; transition: transform .2s, box-shadow .2s;
+    display: flex; flex-direction: column;
+  }
+  .path:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+  .path .icon {
+    width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; margin-bottom: 18px;
+  }
+  .path h3 { font-size: 21px; }
+  .path p { color: var(--ink-soft); margin: 0 0 16px; font-size: 15px; flex: 1; }
+  .path .more { font-weight: 600; color: var(--brand); font-size: 15px; }
+
+  /* Stats band */
+  .band { background: var(--ink); color: #fff; padding: 56px 0; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; text-align: center; }
+  .stats strong { display: block; font: 700 42px Fraunces, serif; color: var(--sun); }
+  .stats span { color: #c5cfdc; font-size: 15px; }
+
+  /* Colleges */
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+  .chip {
+    border: 1px solid var(--line); background: var(--surface); border-radius: 999px;
+    padding: 8px 16px; font: 500 14px Inter, sans-serif; cursor: pointer; color: var(--ink-soft);
+  }
+  .chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .colleges { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .college {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
+  }
+  .college .banner { height: 96px; position: relative; }
+  .college .badge {
+    position: absolute; left: 18px; bottom: -22px; width: 48px; height: 48px; border-radius: 12px;
+    background: var(--surface); box-shadow: var(--shadow); display: grid; place-items: center;
+    font: 700 16px Fraunces, serif;
+  }
+  .college .body { padding: 34px 18px 18px; }
+  .college h3 { font-size: 18px; margin-bottom: 4px; }
+  .college .meta { color: var(--ink-soft); font-size: 14px; }
+  .college .tags { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+  .college .tags span { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--brand-tint); color: var(--brand-dark); }
+  .empty { color: var(--ink-soft); grid-column: 1 / -1; }
+
+  /* Timeline */
+  .timeline-wrap { background: var(--brand-tint); }
+  .tabs { display: flex; gap: 6px; background: var(--surface); padding: 6px; border-radius: 999px; width: fit-content; margin-bottom: 28px; border: 1px solid var(--line); flex-wrap: wrap; }
+  .tab { border: 0; background: none; padding: 10px 20px; border-radius: 999px; font: 600 14px Inter, sans-serif; cursor: pointer; color: var(--ink-soft); }
+  .tab[aria-selected="true"] { background: var(--brand); color: #fff; }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; list-style: none; padding: 0; margin: 0; }
+  .step { background: var(--surface); border-radius: var(--radius); padding: 24px; border: 1px solid var(--line); }
+  .step .num { font: 700 14px Inter, sans-serif; color: var(--accent); margin-bottom: 8px; }
+  .step h3 { font-size: 19px; }
+  .step p { margin: 0; color: var(--ink-soft); font-size: 15px; }
+
+  /* Quote */
+  .quote { display: grid; grid-template-columns: auto 1fr; gap: 32px; align-items: center; max-width: 860px; margin: 0 auto; }
+  .avatar { width: 112px; height: 112px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--sun)); display: grid; place-items: center; color: #fff; font: 700 36px Fraunces, serif; }
+  blockquote { margin: 0; font: 600 clamp(20px, 2.4vw, 26px)/1.4 Fraunces, serif; }
+  .quote cite { display: block; margin-top: 14px; font: 500 15px Inter, sans-serif; font-style: normal; color: var(--ink-soft); }
+
+  /* CTA */
+  .cta {
+    background: var(--accent); color: #fff; border-radius: 24px; padding: 56px;
+    display: flex; justify-content: space-between; align-items: center; gap: 32px; flex-wrap: wrap;
+  }
+  .cta h2 { font-size: clamp(28px, 3.5vw, 40px); margin-bottom: 8px; }
+  .cta p { margin: 0; opacity: .92; font-size: 17px; }
+  .cta .btn { background: #fff; color: var(--ink); }
+
+  /* Footer */
+  footer { border-top: 1px solid var(--line); padding: 56px 0 32px; margin-top: 72px; font-size: 15px; }
+  .foot-grid { display: grid; grid-template-columns: 1.4fr repeat(3, 1fr); gap: 32px; }
+  footer h4 { margin: 0 0 12px; font-size: 14px; text-transform: uppercase; letter-spacing: .06em; }
+  footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  footer a { text-decoration: none; color: var(--ink-soft); }
+  footer a:hover { color: var(--brand); }
+  .fine { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 13px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+
+  /* Responsive */
+  @media (max-width: 960px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .hero-art { max-width: 380px; }
+    .paths, .stats { grid-template-columns: repeat(2, 1fr); }
+    .colleges, .steps { grid-template-columns: repeat(2, 1fr); }
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 760px) {
+    .wrap { padding: 0 16px; }
+    .nav-links, .nav-cta { display: none; }
+    .menu-btn { display: block; }
+    header.open .nav-links {
+      display: flex; flex-direction: column; gap: 0; position: absolute; top: 68px; left: 0; right: 0;
+      background: var(--bg); border-bottom: 1px solid var(--line); padding: 8px 16px 16px;
+    }
+    header.open .nav-links a { display: block; padding: 12px 0; }
+    .paths, .colleges, .steps { grid-template-columns: 1fr; }
+    .quote { grid-template-columns: 1fr; text-align: center; }
+    .avatar { margin: 0 auto; }
+    .cta { padding: 36px 24px; }
+    .search .btn { padding: 12px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header id="top">
+  <div class="wrap nav">
+    <a href="#top" class="logo" aria-label="College Compass home">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
+        <circle cx="17" cy="17" r="15" fill="#0f766e"/>
+        <path d="M17 6 L21 17 L17 28 L13 17 Z" fill="#fff"/>
+        <path d="M17 6 L21 17 L13 17 Z" fill="#f26b4f"/>
+        <circle cx="17" cy="17" r="2" fill="#13233a"/>
+      </svg>
+      College Compass
+    </a>
+    <ul class="nav-links">
+      <li><a href="#explore">Explore</a></li>
+      <li><a href="#colleges">Colleges</a></li>
+      <li><a href="#plan">Plan by grade</a></li>
+      <li><a href="#pay">Paying for college</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="#start" class="btn btn-ghost">For educators</a>
+      <a href="#start" class="btn btn-primary">Get started</a>
+    </div>
+    <button class="menu-btn" aria-label="Open menu" aria-expanded="false">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">Free for every student</span>
+        <h1>Find the path that fits <em>your</em> future.</h1>
+        <p class="lead">Explore colleges and careers, map out the classes you need, and learn how to pay for it, all in one place.</p>
+        <form class="search" onsubmit="event.preventDefault(); searchColleges();">
+          <label for="q" class="sr" style="position:absolute;left:-9999px">Search colleges or careers</label>
+          <input id="q" type="search" placeholder="Search colleges, majors, or careers">
+          <button class="btn btn-primary" type="submit">Search</button>
+        </form>
+        <div class="hero-tags">
+          Popular:
+          <button type="button" data-q="Engineering">Engineering</button>
+          <button type="button" data-q="Nursing">Nursing</button>
+          <button type="button" data-q="Community College">Community college</button>
+          <button type="button" data-q="Art">Art &amp; design</button>
+        </div>
+      </div>
+
+      <div class="hero-art" aria-hidden="true">
+        <svg viewBox="0 0 400 400" width="100%" height="100%">
+          <circle cx="200" cy="200" r="180" fill="#e3f3f1"/>
+          <circle cx="200" cy="200" r="130" fill="#fde9e4"/>
+          <path d="M60 300 Q140 180 200 220 T340 110" fill="none" stroke="#0f766e" stroke-width="6" stroke-dasharray="2 14" stroke-linecap="round"/>
+          <circle cx="60" cy="300" r="14" fill="#13233a"/>
+          <circle cx="340" cy="110" r="18" fill="#f6b93b"/>
+          <path d="M340 110 L340 60 L372 72 L340 84" fill="#f26b4f"/>
+          <rect x="150" y="150" width="100" height="80" rx="6" fill="#fff" stroke="#13233a" stroke-width="3"/>
+          <path d="M140 155 L200 115 L260 155 Z" fill="#0f766e"/>
+          <rect x="190" y="190" width="20" height="40" fill="#13233a"/>
+          <rect x="164" y="168" width="16" height="16" fill="#e3f3f1"/>
+          <rect x="220" y="168" width="16" height="16" fill="#e3f3f1"/>
+        </svg>
+        <div class="hero-card" style="top:6%;left:-4%">
+          <span style="color:var(--ink-soft)">Career matches</span>
+          <strong>12 new</strong>
+        </div>
+        <div class="hero-card" style="bottom:4%;right:-2%">
+          <span style="color:var(--ink-soft)">A–G progress</span>
+          <strong style="color:var(--brand)">9 / 15</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="explore" style="padding-top:24px">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Start exploring</span>
+        <h2>Four ways to plan what's next</h2>
+        <p>Whether you're in 6th grade or about to graduate, pick a place to start.</p>
+      </div>
+      <div class="paths">
+        <a class="path" href="#colleges">
+          <div class="icon" style="background:var(--brand-tint)">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2"><path d="M3 10 12 5l9 5-9 5-9-5Z"/><path d="M7 12v5c3 2 7 2 10 0v-5"/></svg>
+          </div>
+          <h3>Explore colleges</h3>
+          <p>Compare schools by location, size, majors, and cost.</p>
+          <span class="more">Browse colleges →</span>
+        </a>
+        <a class="path" href="#explore">
+          <div class="icon" style="background:var(--accent-tint)">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f26b4f" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+          </div>
+          <h3>Discover careers</h3>
+          <p>Take a quick interest quiz and see jobs that match what you love.</p>
+          <span class="more">Take the quiz →</span>
+        </a>
+        <a class="path" href="#plan">
+          <div class="icon" style="background:#fff4dc">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c98a0b" stroke-width="2"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>
+          </div>
+          <h3>Plan your classes</h3>
+          <p>Track your coursework so you're ready to apply when the time comes.</p>
+          <span class="more">See your plan →</span>
+        </a>
+        <a class="path" href="#pay" id="pay">
+          <div class="icon" style="background:#e8ecf4">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#13233a" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .8-3 2s1.3 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.4 0-2.5-.5-3-1.5M12 6v2M12 16v2"/></svg>
+          </div>
+          <h3>Pay for college</h3>
+          <p>Learn about grants, scholarships, and aid you may qualify for.</p>
+          <span class="more">Find aid →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="band">
+    <div class="wrap stats">
+      <div><strong>100+</strong><span>community colleges</span></div>
+      <div><strong>30+</strong><span>public universities</span></div>
+      <div><strong>800+</strong><span>career profiles</span></div>
+      <div><strong>$0</strong><span>cost to students</span></div>
+    </div>
+  </div>
+
+  <section id="colleges">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Featured schools</span>
+        <h2>Find a college that feels like you</h2>
+        <p>Filter by type of school to see a few places to start your search.</p>
+      </div>
+      <div class="filters" role="group" aria-label="Filter colleges">
+        <button class="chip" aria-pressed="true" data-filter="all">All</button>
+        <button class="chip" aria-pressed="false" data-filter="Community College">Community colleges</button>
+        <button class="chip" aria-pressed="false" data-filter="State University">State universities</button>
+        <button class="chip" aria-pressed="false" data-filter="Research University">Research universities</button>
+        <button class="chip" aria-pressed="false" data-filter="Private">Private</button>
+      </div>
+      <div class="colleges" id="college-list"></div>
+    </div>
+  </section>
+
+  <section id="plan" class="timeline-wrap">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Plan by grade</span>
+        <h2>What to do, and when</h2>
+        <p>Small steps each year add up. Pick your grade to see what's next.</p>
+      </div>
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" aria-selected="true" data-grade="ms">Middle school</button>
+        <button class="tab" role="tab" aria-selected="false" data-grade="9">9th–10th</button>
+        <button class="tab" role="tab" aria-selected="false" data-grade="11">11th</button>
+        <button class="tab" role="tab" aria-selected="false" data-grade="12">12th</button>
+      </div>
+      <ol class="steps" id="steps"></ol>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="quote">
+        <div class="avatar" aria-hidden="true">J</div>
+        <div>
+          <blockquote>"I didn't know where to start. Seeing my classes, my career quiz results, and colleges side by side made it feel possible."</blockquote>
+          <cite>Sample student story, 12th grade</cite>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="start" style="padding-top:0">
+    <div class="wrap">
+      <div class="cta">
+        <div>
+          <h2>Your future starts with one click.</h2>
+          <p>Build your plan, save your favorite colleges, and track your progress.</p>
+        </div>
+        <a href="#explore" class="btn">Start exploring →</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a href="#top" class="logo" style="margin-bottom:12px">College Compass</a>
+        <p style="color:var(--ink-soft);margin:0;max-width:300px">A free guide to colleges, careers, and paying for school.</p>
+      </div>
+      <div>
+        <h4>Students</h4>
+        <ul><li><a href="#colleges">Colleges</a></li><li><a href="#explore">Careers</a></li><li><a href="#plan">Plan by grade</a></li></ul>
+      </div>
+      <div>
+        <h4>Families</h4>
+        <ul><li><a href="#pay">Financial aid</a></li><li><a href="#plan">Timelines</a></li><li><a href="#explore">FAQs</a></li></ul>
+      </div>
+      <div>
+        <h4>Educators</h4>
+        <ul><li><a href="#start">Classroom tools</a></li><li><a href="#start">Resources</a></li><li><a href="#start">Contact</a></li></ul>
+      </div>
+    </div>
+    <div class="fine">
+      <span>© <span id="yr"></span> College Compass</span>
+      <span>Demo site · Not affiliated with any official agency</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const colleges = [
+    { name: "Bayview Community College", type: "Community College", city: "Oakland area", tags: ["Transfer pathways", "Nursing"], color: "#0f766e" },
+    { name: "Sierra Foothills College", type: "Community College", city: "Sacramento area", tags: ["Welding", "Business"], color: "#2b7a3d" },
+    { name: "Coastline State University", type: "State University", city: "Long Beach area", tags: ["Engineering", "Education"], color: "#f26b4f" },
+    { name: "Valley State University", type: "State University", city: "Fresno area", tags: ["Agriculture", "Nursing"], color: "#c98a0b" },
+    { name: "Pacific Research University", type: "Research University", city: "Bay Area", tags: ["Computer science", "Biology"], color: "#13233a" },
+    { name: "Golden Hills University", type: "Research University", city: "Southern California", tags: ["Film", "Art"], color: "#7a3fb0" },
+    { name: "Redwood College of Art", type: "Private", city: "San Francisco", tags: ["Art", "Design"], color: "#b0315f" },
+    { name: "Mission Bay University", type: "Private", city: "San Diego area", tags: ["Marine science", "Business"], color: "#1f6fb2" },
+    { name: "Desert Springs College", type: "Community College", city: "Inland Empire", tags: ["Engineering", "Health"], color: "#d1653a" },
+  ];
+
+  let filter = "all";
+  let query = "";
+  const list = document.getElementById("college-list");
+
+  function initials(name) {
+    return name.split(" ").filter(w => /^[A-Z]/.test(w)).slice(0, 2).map(w => w[0]).join("");
+  }
+
+  function renderColleges() {
+    const q = query.toLowerCase();
+    const shown = colleges.filter(c =>
+      (filter === "all" || c.type === filter) &&
+      (!q || [c.name, c.type, c.city, ...c.tags].join(" ").toLowerCase().includes(q))
+    );
+    list.innerHTML = shown.length ? shown.map(c => `
+      <article class="college">
+        <div class="banner" style="background:linear-gradient(135deg, ${c.color}, ${c.color}cc)">
+          <div class="badge" style="color:${c.color}">${initials(c.name)}</div>
+        </div>
+        <div class="body">
+          <h3>${c.name}</h3>
+          <div class="meta">${c.type} · ${c.city}</div>
+          <div class="tags">${c.tags.map(t => `<span>${t}</span>`).join("")}</div>
+        </div>
+      </article>`).join("")
+      : `<p class="empty">No colleges match "${query}". Try another search.</p>`;
+  }
+
+  document.querySelectorAll(".chip").forEach(chip => chip.addEventListener("click", () => {
+    document.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", "false"));
+    chip.setAttribute("aria-pressed", "true");
+    filter = chip.dataset.filter;
+    renderColleges();
+  }));
+
+  function searchColleges() {
+    query = document.getElementById("q").value.trim();
+    renderColleges();
+    document.getElementById("colleges").scrollIntoView();
+  }
+  document.querySelectorAll(".hero-tags button").forEach(b => b.addEventListener("click", () => {
+    document.getElementById("q").value = b.dataset.q;
+    searchColleges();
+  }));
+
+  const plans = {
+    ms: [
+      ["Explore interests", "Try the career quiz and notice which subjects you enjoy most."],
+      ["Build good habits", "Stay organized, ask questions, and keep your grades strong."],
+      ["Talk about the future", "Chat with family and teachers about what college could look like."],
+    ],
+    9: [
+      ["Know the requirements", "Learn which classes colleges expect and plan four years ahead."],
+      ["Get involved", "Join a club, team, or volunteer project you care about."],
+      ["Start a list", "Save a few colleges and careers that catch your eye."],
+    ],
+    11: [
+      ["Take tough classes", "Challenge yourself with honors, AP, IB, or dual-enrollment courses."],
+      ["Visit campuses", "Tour in person or online to see what feels right."],
+      ["Look for scholarships", "Start a list of scholarships and their deadlines."],
+    ],
+    12: [
+      ["Apply to college", "Most fall deadlines land between November and January."],
+      ["Apply for financial aid", "Complete your aid application as early as you can."],
+      ["Make your choice", "Compare offers and commit by early May."],
+    ],
+  };
+
+  function renderSteps(grade) {
+    document.getElementById("steps").innerHTML = plans[grade].map((s, i) => `
+      <li class="step"><div class="num">Step ${i + 1}</div><h3>${s[0]}</h3><p>${s[1]}</p></li>`).join("");
+  }
+  document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", "false"));
+    tab.setAttribute("aria-selected", "true");
+    renderSteps(tab.dataset.grade);
+  }));
+
+  const header = document.querySelector("header");
+  const menuBtn = document.querySelector(".menu-btn");
+  menuBtn.addEventListener("click", () => {
+    const open = header.classList.toggle("open");
+    menuBtn.setAttribute("aria-expanded", open);
+  });
+  document.querySelectorAll(".nav-links a").forEach(a => a.addEventListener("click", () => header.classList.remove("open")));
+
+  document.getElementById("yr").textContent = new Date().getFullYear();
+  renderColleges();
+  renderSteps("ms");
+</script>
+</body>
+</html>
