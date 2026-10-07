@@ -30,8 +30,10 @@ def main():
     if not SRC.exists():
         sys.exit(f"Missing {SRC.name}. Put the educator content there first.")
     password = getpass.getpass("New educator password: ")
+    if not password:
+        sys.exit("Password can't be empty.")
     if len(password) < 8:
-        sys.exit("Use at least 8 characters.")
+        print("Warning: short passwords are easy to guess.")
     if getpass.getpass("Type it again: ") != password:
         sys.exit("Passwords didn't match.")
 
