@@ -194,7 +194,16 @@
   .modal .error { color: #c0392b; font-size: 14px; min-height: 22px; margin: 8px 0 0; }
   .modal .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 12px; }
   #educators[hidden] { display: none; }
-  #educators { background: #e8ecf4; }
+  #educators { background: #e8ecf4; min-height: calc(100vh - 69px); padding-top: 40px; }
+  .portal-bar { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 40px; }
+  .portal-bar .who { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+  .portal-bar .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--brand); }
+  body.edu-mode main > :not(#educators),
+  body.edu-mode .nav-links,
+  body.edu-mode .nav-cta,
+  body.edu-mode .menu-btn,
+  body.edu-mode footer .foot-grid { display: none !important; }
+  body.edu-mode footer { margin-top: 0; }
   .mobile-only { display: none; }
 
   /* Responsive */
@@ -412,7 +421,13 @@
     </div>
   </section>
   <section id="educators" hidden>
-    <div class="wrap" id="educators-content"></div>
+    <div class="wrap">
+      <div class="portal-bar">
+        <span class="who"><span class="dot"></span>Signed in to the educator portal</span>
+        <button type="button" class="btn btn-ghost" id="edu-exit">← Back to student site</button>
+      </div>
+      <div id="educators-content"></div>
+    </div>
   </section>
 </main>
 
@@ -568,12 +583,35 @@
 
   document.querySelectorAll("[data-educators]").forEach(a => a.addEventListener("click", e => {
     e.preventDefault();
-    if (!eduSection.hidden) return eduSection.scrollIntoView();
+    if (unlocked) return showPortal();
     eduError.textContent = "";
     eduPass.value = "";
     eduDialog.showModal();
   }));
   document.getElementById("edu-cancel").addEventListener("click", () => eduDialog.close());
+
+  // The portal is its own screen: the student page is hidden while it's open.
+  let unlocked = false;
+  function showPortal() {
+    document.body.classList.add("edu-mode");
+    eduSection.hidden = false;
+    header.classList.remove("open");
+    if (location.hash !== "#educators") history.pushState({ portal: true }, "", "#educators");
+    window.scrollTo(0, 0);
+  }
+  function exitPortal() {
+    document.body.classList.remove("edu-mode");
+    eduSection.hidden = true;
+    window.scrollTo(0, 0);
+  }
+  document.getElementById("edu-exit").addEventListener("click", () => {
+    if (history.state?.portal) history.back();
+    else { history.replaceState(null, "", location.pathname); exitPortal(); }
+  });
+  window.addEventListener("popstate", () => {
+    if (location.hash === "#educators" && unlocked) showPortal();
+    else exitPortal();
+  });
 
   async function decryptEducators(password) {
     const data = await (await fetch("educators.enc.json", { cache: "no-store" })).json();
@@ -610,9 +648,9 @@
         return;
       }
       document.getElementById("educators-content").innerHTML = html;
-      eduSection.hidden = false;
+      unlocked = true;
       eduDialog.close();
-      eduSection.scrollIntoView();
+      showPortal();
     } catch {
       eduError.textContent = "Couldn't load the educator portal. Please try again later.";
     } finally {
