@@ -177,6 +177,26 @@
   footer a:hover { color: var(--brand); }
   .fine { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 13px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
 
+  /* Educators gate */
+  .modal {
+    border: 0; border-radius: 20px; padding: 32px; width: min(420px, calc(100% - 32px));
+    box-shadow: 0 20px 60px rgba(19,35,58,.25); color: var(--ink); background: var(--surface);
+  }
+  .modal::backdrop { background: rgba(19,35,58,.45); }
+  .modal h2 { font-size: 26px; }
+  .modal p { color: var(--ink-soft); margin: 0 0 20px; font-size: 15px; }
+  .modal label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+  .modal input {
+    width: 100%; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 10px;
+    font: 16px Inter, sans-serif; color: var(--ink); background: var(--bg);
+  }
+  .modal input:focus { outline: 0; border-color: var(--brand); }
+  .modal .error { color: #c0392b; font-size: 14px; min-height: 22px; margin: 8px 0 0; }
+  .modal .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 12px; }
+  #educators[hidden] { display: none; }
+  #educators { background: #e8ecf4; }
+  .mobile-only { display: none; }
+
   /* Responsive */
   @media (max-width: 960px) {
     .hero-grid { grid-template-columns: 1fr; }
@@ -194,6 +214,7 @@
       background: var(--bg); border-bottom: 1px solid var(--line); padding: 8px 16px 16px;
     }
     header.open .nav-links a { display: block; padding: 12px 0; }
+    header.open .nav-links .mobile-only { display: block; }
     .paths, .colleges, .steps { grid-template-columns: 1fr; }
     .quote { grid-template-columns: 1fr; text-align: center; }
     .avatar { margin: 0 auto; }
@@ -220,9 +241,10 @@
       <li><a href="#colleges">Colleges</a></li>
       <li><a href="#plan">Plan by grade</a></li>
       <li><a href="#pay">Paying for college</a></li>
+      <li class="mobile-only"><a href="#educators" data-educators>For educators</a></li>
     </ul>
     <div class="nav-cta">
-      <a href="#start" class="btn btn-ghost">For educators</a>
+      <a href="#educators" class="btn btn-ghost" data-educators>For educators</a>
       <a href="#start" class="btn btn-primary">Get started</a>
     </div>
     <button class="menu-btn" aria-label="Open menu" aria-expanded="false">
@@ -389,7 +411,25 @@
       </div>
     </div>
   </section>
+  <section id="educators" hidden>
+    <div class="wrap" id="educators-content"></div>
+  </section>
 </main>
+
+<dialog class="modal" id="edu-dialog">
+  <form id="edu-form">
+    <span class="eyebrow">Educator portal</span>
+    <h2>Enter the educator password</h2>
+    <p>This area is for teachers and counselors.</p>
+    <label for="edu-pass">Password</label>
+    <input id="edu-pass" type="password" autocomplete="current-password" required>
+    <p class="error" id="edu-error" role="alert"></p>
+    <div class="actions">
+      <button type="button" class="btn btn-ghost" id="edu-cancel">Cancel</button>
+      <button type="submit" class="btn btn-primary" id="edu-submit">Unlock</button>
+    </div>
+  </form>
+</dialog>
 
 <footer>
   <div class="wrap">
@@ -408,7 +448,7 @@
       </div>
       <div>
         <h4>Educators</h4>
-        <ul><li><a href="#start">Classroom tools</a></li><li><a href="#start">Resources</a></li><li><a href="#start">Contact</a></li></ul>
+        <ul><li><a href="#educators" data-educators>Educator portal</a></li><li><a href="#educators" data-educators>Classroom tools</a></li><li><a href="#educators" data-educators>Resources</a></li></ul>
       </div>
     </div>
     <div class="fine">
@@ -516,6 +556,69 @@
     menuBtn.setAttribute("aria-expanded", open);
   });
   document.querySelectorAll(".nav-links a").forEach(a => a.addEventListener("click", () => header.classList.remove("open")));
+
+  // Educator portal: content lives encrypted in educators.enc.json and is only
+  // decrypted in the browser with the right password (see tools/encrypt_educators.py).
+  const eduDialog = document.getElementById("edu-dialog");
+  const eduPass = document.getElementById("edu-pass");
+  const eduError = document.getElementById("edu-error");
+  const eduSection = document.getElementById("educators");
+  const enc = new TextEncoder();
+  const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+
+  document.querySelectorAll("[data-educators]").forEach(a => a.addEventListener("click", e => {
+    e.preventDefault();
+    if (!eduSection.hidden) return eduSection.scrollIntoView();
+    eduError.textContent = "";
+    eduPass.value = "";
+    eduDialog.showModal();
+  }));
+  document.getElementById("edu-cancel").addEventListener("click", () => eduDialog.close());
+
+  async function decryptEducators(password) {
+    const data = await (await fetch("educators.enc.json", { cache: "no-store" })).json();
+    const salt = b64(data.salt), nonce = b64(data.nonce), ct = b64(data.ciphertext);
+    const base = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveBits"]);
+    const bits = new Uint8Array(await crypto.subtle.deriveBits(
+      { name: "PBKDF2", hash: "SHA-256", salt, iterations: data.iterations }, base, 512));
+    const hmacKey = raw => crypto.subtle.importKey("raw", raw, { name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]);
+    const encKey = await hmacKey(bits.slice(0, 32));
+    const macKey = await hmacKey(bits.slice(32));
+
+    const signed = new Uint8Array([...salt, ...nonce, ...ct]);
+    if (!await crypto.subtle.verify("HMAC", macKey, b64(data.mac), signed)) return null;
+
+    const out = new Uint8Array(ct.length);
+    for (let i = 0; i * 32 < ct.length; i++) {
+      const block = new Uint8Array([...nonce, i >>> 24, (i >>> 16) & 255, (i >>> 8) & 255, i & 255]);
+      const ks = new Uint8Array(await crypto.subtle.sign("HMAC", encKey, block));
+      for (let j = 0; j < 32 && i * 32 + j < ct.length; j++) out[i * 32 + j] = ct[i * 32 + j] ^ ks[j];
+    }
+    return new TextDecoder().decode(out);
+  }
+
+  document.getElementById("edu-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    const btn = document.getElementById("edu-submit");
+    btn.disabled = true;
+    eduError.textContent = "";
+    try {
+      const html = await decryptEducators(eduPass.value);
+      if (html === null) {
+        eduError.textContent = "That password isn't right. Try again.";
+        eduPass.select();
+        return;
+      }
+      document.getElementById("educators-content").innerHTML = html;
+      eduSection.hidden = false;
+      eduDialog.close();
+      eduSection.scrollIntoView();
+    } catch {
+      eduError.textContent = "Couldn't load the educator portal. Please try again later.";
+    } finally {
+      btn.disabled = false;
+    }
+  });
 
   document.getElementById("yr").textContent = new Date().getFullYear();
   renderColleges();
