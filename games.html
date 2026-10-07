@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Break Room · College Compass</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #13233a; --ink-soft: #4a5a70; --bg: #fbfaf7; --surface: #fff; --line: #e4e1d8;
+    --brand: #0f766e; --brand-dark: #0b5952; --brand-tint: #e3f3f1; --accent: #f26b4f; --sun: #f6b93b;
+    --radius: 14px; --shadow: 0 1px 2px rgba(19,35,58,.06), 0 8px 24px rgba(19,35,58,.06);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Inter, system-ui, sans-serif; color: var(--ink); background: var(--bg); line-height: 1.6; }
+  h1, h2, h3 { font-family: Fraunces, Georgia, serif; line-height: 1.15; margin: 0 0 .4em; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+  header { border-bottom: 1px solid var(--line); background: var(--bg); }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 68px; }
+  .logo { display: flex; align-items: center; gap: 10px; font: 700 20px Fraunces, serif; text-decoration: none; color: inherit; }
+  .back { color: var(--ink-soft); text-decoration: none; font-weight: 500; }
+  .back:hover { color: var(--brand); }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 999px; border: 0; font: 600 14px Inter, sans-serif; cursor: pointer; text-decoration: none; }
+  .btn-primary { background: var(--brand); color: #fff; }
+  .btn-primary:hover { background: var(--brand-dark); }
+  .btn-ghost { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+  main { padding: 40px 0 72px; }
+  .intro p { color: var(--ink-soft); margin: 0 0 28px; }
+  .layout { display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
+  .id-badge {
+    font: 700 22px ui-monospace, Menlo, monospace; letter-spacing: .04em; background: var(--ink); color: var(--sun);
+    padding: 12px 14px; border-radius: 10px; text-align: center; margin: 8px 0 12px;
+  }
+  .label { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  input[type=text], textarea {
+    width: 100%; font: 15px Inter, sans-serif; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--ink);
+  }
+  textarea { font: 12px ui-monospace, Menlo, monospace; height: 70px; resize: vertical; }
+  .field { margin: 16px 0; }
+  .field label { display: block; margin-bottom: 6px; }
+  .stats { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .stats li { display: flex; justify-content: space-between; padding: 8px 10px; background: var(--brand-tint); border-radius: 8px; }
+  .muted { color: var(--ink-soft); font-size: 13px; }
+  .msg { font-size: 13px; color: var(--brand); min-height: 1.2em; margin-top: 6px; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 18px 0; }
+  .game-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+  .scores { display: flex; gap: 16px; font-weight: 600; }
+  .scores span { color: var(--ink-soft); font-weight: 500; }
+  .board-wrap { position: relative; max-width: 480px; margin: 0 auto; }
+  canvas { width: 100%; aspect-ratio: 1; display: block; border-radius: 12px; background: #0e1b2d; touch-action: none; }
+  .overlay {
+    position: absolute; inset: 0; display: grid; place-items: center; text-align: center;
+    background: rgba(14,27,45,.82); color: #fff; border-radius: 12px; padding: 20px;
+  }
+  .overlay[hidden] { display: none; }
+  .overlay h3 { color: var(--sun); font-size: 28px; }
+  .pad { display: none; grid-template-columns: repeat(3, 56px); gap: 8px; justify-content: center; margin-top: 14px; }
+  .pad button { height: 56px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font-size: 22px; cursor: pointer; }
+  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+  @media (max-width: 600px) { .wrap { padding: 0 16px; } .pad { display: grid; } .back { font-size: 14px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a href="./" class="logo">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="15" fill="#0f766e"/><path d="M17 6 L21 17 L17 28 L13 17 Z" fill="#fff"/><path d="M17 6 L21 17 L13 17 Z" fill="#f26b4f"/><circle cx="17" cy="17" r="2" fill="#13233a"/></svg>
+      College Compass
+    </a>
+    <a href="./" class="back">← Back to home</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="intro">
+    <h1>Break Room</h1>
+    <p>Take a quick break. Your player ID keeps your scores saved in this browser.</p>
+  </div>
+
+  <div class="layout">
+    <aside class="card">
+      <div class="label">Your player ID</div>
+      <div class="id-badge" id="pid">…</div>
+      <div class="row">
+        <button class="btn btn-ghost" id="copy-id">Copy ID</button>
+      </div>
+
+      <div class="field">
+        <label class="label" for="pname">Nickname</label>
+        <input type="text" id="pname" maxlength="20" placeholder="Player">
+      </div>
+
+      <div class="label">Your stats</div>
+      <ul class="stats" id="stats"></ul>
+
+      <hr>
+      <div class="label">Move to another device</div>
+      <p class="muted">Copy your save code here, then paste it on the other device.</p>
+      <div class="row">
+        <button class="btn btn-ghost" id="export">Copy save code</button>
+      </div>
+      <div class="field">
+        <textarea id="import-code" placeholder="Paste a save code"></textarea>
+        <div class="row" style="margin-top:8px">
+          <button class="btn btn-primary" id="import">Load save</button>
+          <button class="btn btn-ghost" id="reset">New ID</button>
+        </div>
+        <div class="msg" id="msg" role="status"></div>
+      </div>
+    </aside>
+
+    <section class="card">
+      <div class="game-head">
+        <h2 style="margin:0">Snake</h2>
+        <div class="scores">
+          <div><span>Score</span> <b id="score">0</b></div>
+          <div><span>Best</span> <b id="best">0</b></div>
+        </div>
+      </div>
+      <div class="board-wrap">
+        <canvas id="board" width="480" height="480"></canvas>
+        <div class="overlay" id="overlay">
+          <div>
+            <h3 id="ov-title">Snake</h3>
+            <p id="ov-text" style="margin:0 0 16px;color:#c5cfdc">Arrow keys or WASD to move. On a phone, swipe or use the buttons.</p>
+            <button class="btn btn-primary" id="play">Play</button>
+          </div>
+        </div>
+      </div>
+      <div class="pad" aria-label="Direction buttons">
+        <span></span><button data-dir="up" aria-label="Up">▲</button><span></span>
+        <button data-dir="left" aria-label="Left">◀</button><button data-dir="down" aria-label="Down">▼</button><button data-dir="right" aria-label="Right">▶</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script src="player.js"></script>
+<script>
+  // ---------- Player card ----------
+  const GAME_NAMES = { snake: "Snake" };
+  const $ = id => document.getElementById(id);
+
+  function renderProfile() {
+    $("pid").textContent = Player.id;
+    $("pname").value = Player.name === "Player" ? "" : Player.name;
+    const games = Player.allGames();
+    const rows = Object.keys(GAME_NAMES).map(k => {
+      const g = games[k] || {};
+      return `<li><span>${GAME_NAMES[k]}</span><span>Best ${g.best || 0} · ${g.plays || 0} plays</span></li>`;
+    });
+    $("stats").innerHTML = rows.join("");
+    $("best").textContent = (games.snake && games.snake.best) || 0;
+  }
+
+  function flash(text) { $("msg").textContent = text; setTimeout(() => $("msg").textContent = "", 2500); }
+  async function copy(text, label) {
+    try { await navigator.clipboard.writeText(text); flash(`${label} copied.`); }
+    catch { $("import-code").value = text; flash(`Couldn't copy automatically, so it's in the box above.`); }
+  }
+
+  $("copy-id").onclick = () => copy(Player.id, "Player ID");
+  $("pname").oninput = e => Player.setName(e.target.value);
+  $("export").onclick = () => copy(Player.exportCode(), "Save code");
+  $("import").onclick = () => {
+    try { Player.importCode($("import-code").value); $("import-code").value = ""; renderProfile(); flash("Save loaded."); }
+    catch { flash("That save code didn't work."); }
+  };
+  $("reset").onclick = () => {
+    if (confirm("Start over with a new player ID? Your current scores will be cleared.")) { Player.reset(); renderProfile(); flash("New ID created."); }
+  };
+
+  // ---------- Snake ----------
+  const canvas = $("board"), ctx = canvas.getContext("2d");
+  const N = 20, CELL = canvas.width / N;
+  let snake, dir, nextDir, food, score, timer, running = false;
+
+  function placeFood() {
+    do { food = { x: Math.floor(Math.random() * N), y: Math.floor(Math.random() * N) }; }
+    while (snake.some(s => s.x === food.x && s.y === food.y));
+  }
+
+  function start() {
+    snake = [{ x: 9, y: 10 }, { x: 8, y: 10 }, { x: 7, y: 10 }];
+    dir = nextDir = { x: 1, y: 0 };
+    score = 0; $("score").textContent = 0;
+    placeFood();
+    $("overlay").hidden = true;
+    running = true;
+    clearInterval(timer);
+    timer = setInterval(tick, 110);
+    draw();
+  }
+
+  function gameOver() {
+    running = false; clearInterval(timer);
+    const isBest = Player.submitScore("snake", score);
+    renderProfile();
+    $("ov-title").textContent = isBest && score > 0 ? "New best!" : "Game over";
+    $("ov-text").textContent = `${Player.name}, you scored ${score}.`;
+    $("play").textContent = "Play again";
+    $("overlay").hidden = false;
+  }
+
+  function tick() {
+    dir = nextDir;
+    const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+    const hitWall = head.x < 0 || head.y < 0 || head.x >= N || head.y >= N;
+    const hitSelf = snake.slice(0, -1).some(s => s.x === head.x && s.y === head.y);
+    if (hitWall || hitSelf) return gameOver();
+    snake.unshift(head);
+    if (head.x === food.x && head.y === food.y) { score++; $("score").textContent = score; placeFood(); }
+    else snake.pop();
+    draw();
+  }
+
+  function draw() {
+    ctx.fillStyle = "#0e1b2d"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#16273d";
+    for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) if ((i + j) % 2) ctx.fillRect(i * CELL, j * CELL, CELL, CELL);
+    ctx.fillStyle = "#f26b4f";
+    ctx.beginPath(); ctx.arc(food.x * CELL + CELL / 2, food.y * CELL + CELL / 2, CELL * .38, 0, Math.PI * 2); ctx.fill();
+    snake.forEach((s, i) => {
+      ctx.fillStyle = i === 0 ? "#f6b93b" : "#2bb3a5";
+      ctx.beginPath(); ctx.roundRect(s.x * CELL + 2, s.y * CELL + 2, CELL - 4, CELL - 4, 5); ctx.fill();
+    });
+  }
+
+  const DIRS = { up: { x: 0, y: -1 }, down: { x: 0, y: 1 }, left: { x: -1, y: 0 }, right: { x: 1, y: 0 } };
+  function turn(name) {
+    const d = DIRS[name];
+    if (!running || !d) return;
+    if (d.x === -dir.x && d.y === -dir.y) return; // no reversing into yourself
+    nextDir = d;
+  }
+  const KEYS = { ArrowUp: "up", w: "up", ArrowDown: "down", s: "down", ArrowLeft: "left", a: "left", ArrowRight: "right", d: "right" };
+  document.addEventListener("keydown", e => {
+    if (document.activeElement.matches("input, textarea")) return;
+    const k = KEYS[e.key] || KEYS[e.key.toLowerCase()];
+    if (k) { e.preventDefault(); turn(k); }
+    else if ((e.key === " " || e.key === "Enter") && !running) { e.preventDefault(); start(); }
+  });
+  document.querySelectorAll(".pad button").forEach(b => b.addEventListener("click", () => turn(b.dataset.dir)));
+  let touch;
+  canvas.addEventListener("touchstart", e => { touch = e.touches[0]; }, { passive: true });
+  canvas.addEventListener("touchend", e => {
+    if (!touch) return;
+    const t = e.changedTouches[0], dx = t.clientX - touch.clientX, dy = t.clientY - touch.clientY;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) > 20) turn(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy > 0 ? "down" : "up"));
+    touch = null;
+  });
+  $("play").onclick = start;
+
+  snake = [{ x: 9, y: 10 }, { x: 8, y: 10 }, { x: 7, y: 10 }]; food = { x: 14, y: 10 };
+  draw();
+  renderProfile();
+</script>
+</body>
+</html>
